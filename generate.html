@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate — ProductAI</title>
+<link rel="stylesheet" href="css/app.css">
+<style>
+.gen-layout { display: grid; grid-template-columns: 260px 1fr; gap: 1.5rem; align-items: start; }
+.gen-sidebar { background: var(--s1); border: 1px solid var(--border); border-radius: var(--rad); overflow: hidden; position: sticky; top: 76px; }
+.sidebar-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-family: var(--fm); font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--t2); }
+.sidebar-items { padding: .5rem; }
+.sidebar-item { display: flex; align-items: center; gap: .65rem; padding: .65rem .75rem; border-radius: 8px; cursor: pointer; transition: all var(--tr); font-size: .85rem; font-weight: 500; color: var(--t2); }
+.sidebar-item:hover { background: var(--s2); color: var(--text); }
+.sidebar-item.active { background: rgba(124,58,255,.15); color: var(--v2); border-left: 2px solid var(--v); }
+.sidebar-item-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+.gen-main { }
+.gen-panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--rad); overflow: hidden; display: none; }
+.gen-panel.active { display: block; }
+.gen-panel-head { background: var(--s2); padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.gen-panel-title { font-family: var(--fd); font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
+.gen-panel-body { padding: 1.5rem; }
+.gen-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+.output-box { background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; padding: 1.25rem; margin-top: 1.25rem; display: none; animation: fadeUp .4s ease; }
+.output-box-title { font-family: var(--fm); font-size: .72rem; color: var(--g2); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+.output-item { padding: .4rem 0; font-size: .84rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: .5rem; }
+.output-item:last-child { border: none; }
+.output-item::before { content: '▸'; color: var(--v); font-size: .7rem; flex-shrink: 0; margin-top: 2px; }
+
+.gen-progress-wrap { margin-top: 1rem; }
+.gen-step { font-family: var(--fm); font-size: .78rem; color: var(--t2); margin-bottom: .5rem; }
+.pct-label { font-family: var(--fm); font-size: .72rem; color: var(--g); float: right; }
+
+.download-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+
+.options-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; }
+.opt-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: .65rem .5rem; text-align: center; cursor: pointer; transition: all .18s; }
+.opt-btn.active { border-color: var(--v); background: rgba(124,58,255,.1); }
+.opt-icon { font-size: 1.2rem; display: block; margin-bottom: .2rem; }
+.opt-label { font-size: .72rem; color: var(--t2); }
+.opt-btn.active .opt-label { color: var(--v2); }
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){ .gen-layout{grid-template-columns:1fr} .gen-sidebar{position:static} .gen-2col{grid-template-columns:1fr} .options-grid{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html"><div class="nav-logo-icon">🏭</div> ProductAI</a>
+  <ul class="nav-links">
+    <li><a href="generate.html" class="active">Generate</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="nav-right">
+    <span class="nav-credits" id="creditsBadge">— credits</span>
+    <a id="nav-login" class="btn btn-ghost btn-sm" href="login.html">Sign In</a>
+    <a id="nav-logout" class="btn btn-ghost btn-sm" href="#" onclick="Auth.logout()" style="display:none">Logout</a>
+  </div>
+</nav>
+
+<div class="section">
+  <div class="section-label">// AI Generator</div>
+  <h2 class="section-title" style="margin-bottom:1.5rem">Generate Digital Products</h2>
+
+  <div class="gen-layout">
+    <!-- SIDEBAR -->
+    <div class="gen-sidebar">
+      <div class="sidebar-head">Product Type</div>
+      <div class="sidebar-items">
+        <div class="sidebar-item active" onclick="showPanel('ebook',this)"><span class="sidebar-item-icon">📘</span>Ebook / PDF</div>
+        <div class="sidebar-item" onclick="showPanel('audiobook',this)"><span class="sidebar-item-icon">🎧</span>Audiobook</div>
+        <div class="sidebar-item" onclick="showPanel('video',this)"><span class="sidebar-item-icon">🎬</span>Video Script</div>
+        <div class="sidebar-item" onclick="showPanel('images',this)"><span class="sidebar-item-icon">🖼️</span>Image Pack</div>
+        <div class="sidebar-item" onclick="showPanel('website',this)"><span class="sidebar-item-icon">🌐</span>Website</div>
+        <div class="sidebar-item" onclick="showPanel('content',this)"><span class="sidebar-item-icon">✍️</span>Content Pack</div>
+        <div class="sidebar-item" onclick="showPanel('course',this)"><span class="sidebar-item-icon">🎓</span>Online Course</div>
+        <div class="sidebar-item" onclick="showPanel('prompts',this)"><span class="sidebar-item-icon">✨</span>Prompt Pack</div>
+        <div class="sidebar-item" onclick="showPanel('coloring',this)"><span class="sidebar-item-icon">🖍️</span>Coloring Book</div>
+        <div class="sidebar-item" onclick="showPanel('template',this)"><span class="sidebar-item-icon">📊</span>Template / Planner</div>
+        <div class="sidebar-item" onclick="showPanel('podcast',this)"><span class="sidebar-item-icon">🎙️</span>Podcast Script</div>
+        <div class="sidebar-item" onclick="showPanel('agent',this)"><span class="sidebar-item-icon">🤖</span>AI Agent / Persona</div>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+    <div>
+
+      <!-- EBOOK -->
+      <div class="gen-panel active" id="panel-ebook">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">📘 Ebook / PDF Generator</div>
+          <span class="badge badge-green badge-live">Live</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Topic / Title</label>
+                <input class="form-input" id="ebook-topic" placeholder="e.g. The Complete Guide to Bitcoin for Beginners"></div>
+              <div class="form-group"><label class="form-label">Target Audience</label>
+                <select class="form-select" id="ebook-audience">
+                  <option value="general">General Adults</option>
+                  <option value="beginners">Complete Beginners</option>
+                  <option value="kids">Kids (Ages 8–12)</option>
+                  <option value="professionals">Professionals / Experts</option>
+                  <option value="entrepreneurs">Entrepreneurs</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Number of Chapters</label>
+                <select class="form-select" id="ebook-chapters">
+                  <option value="5">5 chapters (~30 pages)</option>
+                  <option value="10" selected>10 chapters (~60 pages)</option>
+                  <option value="15">15 chapters (~100 pages)</option>
+                  <option value="20">20 chapters (~150 pages)</option>
+                </select></div>
+            </div>
+            <div>
+              <div class="form-group"><label class="form-label">Style</label>
+              <div class="options-grid">
+                <div class="opt-btn active" data-group="ebook-style" onclick="selOpt(this,'ebook-style')"><span class="opt-icon">📖</span><span class="opt-label">Educational</span></div>
+                <div class="opt-btn" data-group="ebook-style" onclick="selOpt(this,'ebook-style')"><span class="opt-icon">💼</span><span class="opt-label">Business</span></div>
+                <div class="opt-btn" data-group="ebook-style" onclick="selOpt(this,'ebook-style')"><span class="opt-icon">🎯</span><span class="opt-label">How-To Guide</span></div>
+                <div class="opt-btn" data-group="ebook-style" onclick="selOpt(this,'ebook-style')"><span class="opt-icon">🔬</span><span class="opt-label">Research</span></div>
+                <div class="opt-btn" data-group="ebook-style" onclick="selOpt(this,'ebook-style')"><span class="opt-icon">✨</span><span class="opt-label">Inspirational</span></div>
+                <div class="opt-btn" data-group="ebook-style" onclick="selOpt(this,'ebook-style')"><span class="opt-icon">📋</span><span class="opt-label">Workbook</span></div>
+              </div></div>
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center;margin-top:.75rem" onclick="generate('ebook')">⚡ Generate Ebook</button>
+              <div class="gen-progress-wrap" id="ebook-progress" style="display:none">
+                <div class="gen-step"><span id="ebook-step">Initializing...</span><span class="pct-label" id="ebook-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="ebook-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="ebook-output">
+            <div class="output-box-title"><span>✅</span> Ebook Generated</div>
+            <div id="ebook-result"></div>
+            <div class="download-row" id="ebook-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDIOBOOK -->
+      <div class="gen-panel" id="panel-audiobook">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">🎧 Audiobook Generator</div>
+          <span class="badge badge-green badge-live">Live</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Topic</label>
+                <input class="form-input" id="audiobook-topic" placeholder="e.g. Mindfulness for Busy Professionals"></div>
+              <div class="form-group"><label class="form-label">Chapters</label>
+                <select class="form-select" id="audiobook-chapters">
+                  <option value="5">5 chapters</option>
+                  <option value="8" selected>8 chapters</option>
+                  <option value="12">12 chapters</option>
+                </select></div>
+            </div>
+            <div>
+              <div class="form-group"><label class="form-label">Narrator Voice</label>
+              <div class="options-grid">
+                <div class="opt-btn active" data-group="ab-voice" onclick="selOpt(this,'ab-voice')"><span class="opt-icon">👩</span><span class="opt-label">Female</span></div>
+                <div class="opt-btn" data-group="ab-voice" onclick="selOpt(this,'ab-voice')"><span class="opt-icon">👨</span><span class="opt-label">Male</span></div>
+                <div class="opt-btn" data-group="ab-voice" onclick="selOpt(this,'ab-voice')"><span class="opt-icon">🧒</span><span class="opt-label">Child</span></div>
+                <div class="opt-btn" data-group="ab-voice" onclick="selOpt(this,'ab-voice')"><span class="opt-icon">🎙️</span><span class="opt-label">Calm</span></div>
+                <div class="opt-btn" data-group="ab-voice" onclick="selOpt(this,'ab-voice')"><span class="opt-icon">⚡</span><span class="opt-label">Energetic</span></div>
+                <div class="opt-btn" data-group="ab-voice" onclick="selOpt(this,'ab-voice')"><span class="opt-icon">💼</span><span class="opt-label">Professional</span></div>
+              </div></div>
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center;margin-top:.75rem" onclick="generate('audiobook')">⚡ Generate Audiobook</button>
+              <div class="gen-progress-wrap" id="audiobook-progress" style="display:none">
+                <div class="gen-step"><span id="audiobook-step">Initializing...</span><span class="pct-label" id="audiobook-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="audiobook-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="audiobook-output">
+            <div class="output-box-title"><span>✅</span> Audiobook Generated</div>
+            <div id="audiobook-result"></div>
+            <div class="download-row" id="audiobook-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIDEO -->
+      <div class="gen-panel" id="panel-video">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">🎬 Video Script + Voiceover</div>
+          <span class="badge badge-green badge-live">Live</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Topic</label>
+                <input class="form-input" id="video-topic" placeholder="e.g. 5 Python tricks every developer should know"></div>
+              <div class="form-group"><label class="form-label">Platform</label>
+                <select class="form-select" id="video-platform">
+                  <option value="youtube">YouTube</option>
+                  <option value="tiktok">TikTok</option>
+                  <option value="shorts">YouTube Shorts</option>
+                  <option value="instagram">Instagram Reels</option>
+                  <option value="linkedin">LinkedIn</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Video Length</label>
+                <select class="form-select" id="video-length">
+                  <option value="short">Short (30s – 2min)</option>
+                  <option value="medium" selected>Medium (2 – 8min)</option>
+                  <option value="long">Long (8 – 20min)</option>
+                </select></div>
+            </div>
+            <div>
+              <div class="form-group"><label class="form-label">Style</label>
+              <div class="options-grid">
+                <div class="opt-btn active" data-group="vid-style" onclick="selOpt(this,'vid-style')"><span class="opt-icon">🎓</span><span class="opt-label">Educational</span></div>
+                <div class="opt-btn" data-group="vid-style" onclick="selOpt(this,'vid-style')"><span class="opt-icon">😂</span><span class="opt-label">Comedy</span></div>
+                <div class="opt-btn" data-group="vid-style" onclick="selOpt(this,'vid-style')"><span class="opt-icon">🔥</span><span class="opt-label">Viral Hook</span></div>
+                <div class="opt-btn" data-group="vid-style" onclick="selOpt(this,'vid-style')"><span class="opt-icon">📰</span><span class="opt-label">News Style</span></div>
+                <div class="opt-btn" data-group="vid-style" onclick="selOpt(this,'vid-style')"><span class="opt-icon">🧒</span><span class="opt-label">Kids</span></div>
+                <div class="opt-btn" data-group="vid-style" onclick="selOpt(this,'vid-style')"><span class="opt-icon">💼</span><span class="opt-label">Professional</span></div>
+              </div></div>
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center;margin-top:.75rem" onclick="generate('video')">⚡ Generate Video Package</button>
+              <div class="gen-progress-wrap" id="video-progress" style="display:none">
+                <div class="gen-step"><span id="video-step">Initializing...</span><span class="pct-label" id="video-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="video-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="video-output">
+            <div class="output-box-title"><span>✅</span> Video Package Generated</div>
+            <div id="video-result"></div>
+            <div class="download-row" id="video-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGES -->
+      <div class="gen-panel" id="panel-images">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">🖼️ AI Image Pack Generator</div>
+          <span class="badge badge-green badge-live">DALL-E 3</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Theme</label>
+                <input class="form-input" id="images-theme" placeholder="e.g. Cozy autumn coffee shop scenes"></div>
+              <div class="form-group"><label class="form-label">Number of Images</label>
+                <select class="form-select" id="images-count">
+                  <option value="5">5 images</option>
+                  <option value="10" selected>10 images</option>
+                  <option value="20">20 images</option>
+                </select></div>
+            </div>
+            <div>
+              <div class="form-group"><label class="form-label">Art Style</label>
+              <div class="options-grid">
+                <div class="opt-btn active" data-group="img-style" onclick="selOpt(this,'img-style')"><span class="opt-icon">🎨</span><span class="opt-label">Digital Art</span></div>
+                <div class="opt-btn" data-group="img-style" onclick="selOpt(this,'img-style')"><span class="opt-icon">📸</span><span class="opt-label">Photorealistic</span></div>
+                <div class="opt-btn" data-group="img-style" onclick="selOpt(this,'img-style')"><span class="opt-icon">🖼️</span><span class="opt-label">Oil Painting</span></div>
+                <div class="opt-btn" data-group="img-style" onclick="selOpt(this,'img-style')"><span class="opt-icon">✏️</span><span class="opt-label">Line Art</span></div>
+                <div class="opt-btn" data-group="img-style" onclick="selOpt(this,'img-style')"><span class="opt-icon">🌸</span><span class="opt-label">Anime</span></div>
+                <div class="opt-btn" data-group="img-style" onclick="selOpt(this,'img-style')"><span class="opt-icon">🎭</span><span class="opt-label">Cartoon</span></div>
+              </div></div>
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center;margin-top:.75rem" onclick="generate('images')">⚡ Generate Image Pack</button>
+              <div class="gen-progress-wrap" id="images-progress" style="display:none">
+                <div class="gen-step"><span id="images-step">Initializing...</span><span class="pct-label" id="images-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="images-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="images-output">
+            <div class="output-box-title"><span>✅</span> Image Pack Generated</div>
+            <div id="images-result"></div>
+            <div class="download-row" id="images-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEBSITE -->
+      <div class="gen-panel" id="panel-website">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">🌐 Website Generator</div>
+          <span class="badge badge-green badge-live">Full HTML</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Business Name</label>
+                <input class="form-input" id="website-name" placeholder="e.g. SwiftFit Pro"></div>
+              <div class="form-group"><label class="form-label">Niche / Industry</label>
+                <input class="form-input" id="website-niche" placeholder="e.g. Online fitness coaching for busy moms"></div>
+            </div>
+            <div>
+              <div class="form-group"><label class="form-label">Website Style</label>
+              <div class="options-grid">
+                <div class="opt-btn active" data-group="web-style" onclick="selOpt(this,'web-style')"><span class="opt-icon">✨</span><span class="opt-label">Modern</span></div>
+                <div class="opt-btn" data-group="web-style" onclick="selOpt(this,'web-style')"><span class="opt-icon">🏢</span><span class="opt-label">Corporate</span></div>
+                <div class="opt-btn" data-group="web-style" onclick="selOpt(this,'web-style')"><span class="opt-icon">🎨</span><span class="opt-label">Creative</span></div>
+                <div class="opt-btn" data-group="web-style" onclick="selOpt(this,'web-style')"><span class="opt-icon">🌿</span><span class="opt-label">Minimal</span></div>
+                <div class="opt-btn" data-group="web-style" onclick="selOpt(this,'web-style')"><span class="opt-icon">🌙</span><span class="opt-label">Dark Mode</span></div>
+                <div class="opt-btn" data-group="web-style" onclick="selOpt(this,'web-style')"><span class="opt-icon">🍎</span><span class="opt-label">Apple-Style</span></div>
+              </div></div>
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center;margin-top:.75rem" onclick="generate('website')">⚡ Generate Website</button>
+              <div class="gen-progress-wrap" id="website-progress" style="display:none">
+                <div class="gen-step"><span id="website-step">Initializing...</span><span class="pct-label" id="website-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="website-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="website-output">
+            <div class="output-box-title"><span>✅</span> Website Generated</div>
+            <div id="website-result"></div>
+            <div class="download-row" id="website-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="gen-panel" id="panel-content">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">✍️ Content Pack Generator</div>
+          <span class="badge badge-green badge-live">Live</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Topic / Brand</label>
+                <input class="form-input" id="content-topic" placeholder="e.g. Sustainable living for millennials"></div>
+              <div class="form-group"><label class="form-label">Pack Type</label>
+                <select class="form-select" id="content-type">
+                  <option value="social">Social Media (30 posts)</option>
+                  <option value="email">Email Sequence (7 emails)</option>
+                  <option value="blog">Blog Posts (5 articles)</option>
+                  <option value="ads">Ad Copy Pack (20 ads)</option>
+                  <option value="podcast">Podcast Scripts (8 episodes)</option>
+                </select></div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:flex-end">
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center" onclick="generate('content')">⚡ Generate Content Pack</button>
+              <div class="gen-progress-wrap" id="content-progress" style="display:none">
+                <div class="gen-step"><span id="content-step">Writing...</span><span class="pct-label" id="content-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="content-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="content-output">
+            <div class="output-box-title"><span>✅</span> Content Pack Generated</div>
+            <div id="content-result"></div>
+            <div class="download-row" id="content-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COURSE -->
+      <div class="gen-panel" id="panel-course">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">🎓 Online Course Generator</div>
+          <span class="badge badge-purple">Full Curriculum</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Course Topic</label>
+                <input class="form-input" id="course-topic" placeholder="e.g. Complete Python for Data Science"></div>
+              <div class="form-group"><label class="form-label">Level</label>
+                <select class="form-select" id="course-level">
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                  <option value="all-levels">All Levels</option>
+                </select></div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:flex-end">
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center" onclick="generate('course')">⚡ Generate Course</button>
+              <div class="gen-progress-wrap" id="course-progress" style="display:none">
+                <div class="gen-step"><span id="course-step">Building curriculum...</span><span class="pct-label" id="course-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="course-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="course-output">
+            <div class="output-box-title"><span>✅</span> Course Generated</div>
+            <div id="course-result"></div>
+            <div class="download-row" id="course-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROMPTS -->
+      <div class="gen-panel" id="panel-prompts">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">✨ Prompt Pack Generator</div>
+          <span class="badge badge-yellow">AI Engineered</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Category</label>
+                <input class="form-input" id="prompts-category" placeholder="e.g. Midjourney portrait photography prompts"></div>
+              <div class="form-group"><label class="form-label">Quantity</label>
+                <select class="form-select" id="prompts-count">
+                  <option value="25">25 prompts</option>
+                  <option value="50" selected>50 prompts</option>
+                  <option value="100">100 prompts</option>
+                  <option value="200">200 prompts</option>
+                </select></div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:flex-end">
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center" onclick="generate('prompts')">⚡ Generate Prompt Pack</button>
+              <div class="gen-progress-wrap" id="prompts-progress" style="display:none">
+                <div class="gen-step"><span id="prompts-step">Engineering prompts...</span><span class="pct-label" id="prompts-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="prompts-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="prompts-output">
+            <div class="output-box-title"><span>✅</span> Prompt Pack Generated</div>
+            <div id="prompts-result"></div>
+            <div class="download-row" id="prompts-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLORING BOOK -->
+      <div class="gen-panel" id="panel-coloring">
+        <div class="gen-panel-head">
+          <div class="gen-panel-title">🖍️ Coloring Book Generator</div>
+          <span class="badge badge-orange">Print-Ready</span>
+        </div>
+        <div class="gen-panel-body">
+          <div class="gen-2col">
+            <div>
+              <div class="form-group"><label class="form-label">Theme</label>
+                <input class="form-input" id="coloring-theme" placeholder="e.g. Underwater ocean animals"></div>
+              <div class="form-group"><label class="form-label">Pages</label>
+                <select class="form-select" id="coloring-pages">
+                  <option value="10">10 pages</option>
+                  <option value="15" selected>15 pages</option>
+                  <option value="25">25 pages</option>
+                  <option value="50">50 pages</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Age Group</label>
+                <select class="form-select" id="coloring-age">
+                  <option value="toddler">Toddlers (2–4)</option>
+                  <option value="kids" selected>Kids (4–10)</option>
+                  <option value="tweens">Tweens (10–14)</option>
+                  <option value="adults">Adults</option>
+                </select></div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:flex-end">
+              <button class="btn btn-primary btn-md" style="width:100%;justify-content:center" onclick="generate('coloring')">⚡ Generate Coloring Book</button>
+              <div class="gen-progress-wrap" id="coloring-progress" style="display:none">
+                <div class="gen-step"><span id="coloring-step">Designing pages...</span><span class="pct-label" id="coloring-pct">0%</span></div>
+                <div class="progress-track"><div class="progress-fill" id="coloring-fill" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="output-box" id="coloring-output">
+            <div class="output-box-title"><span>✅</span> Coloring Book Generated</div>
+            <div id="coloring-result"></div>
+            <div class="download-row" id="coloring-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEMPLATE (maps to content) -->
+      <div class="gen-panel" id="panel-template">
+        <div class="gen-panel-head"><div class="gen-panel-title">📊 Template / Planner Generator</div><span class="badge badge-yellow">Fillable PDF</span></div>
+        <div class="gen-panel-body">
+          <div class="form-group"><label class="form-label">Template Type</label>
+            <input class="form-input" id="template-topic" placeholder="e.g. 90-day fitness tracker, budget planner, gratitude journal"></div>
+          <button class="btn btn-primary btn-md" onclick="generate('template')" style="margin-top:.5rem">⚡ Generate Template</button>
+          <div class="gen-progress-wrap" id="template-progress" style="display:none">
+            <div class="gen-step"><span id="template-step">Building...</span><span class="pct-label" id="template-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="template-fill" style="width:0%"></div></div>
+          </div>
+          <div class="output-box" id="template-output">
+            <div class="output-box-title"><span>✅</span> Template Generated</div>
+            <div id="template-result"></div>
+            <div class="download-row" id="template-downloads"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PODCAST -->
+      <div class="gen-panel" id="panel-podcast">
+        <div class="gen-panel-head"><div class="gen-panel-title">🎙️ Podcast Script Generator</div><span class="badge badge-purple">Multi-Episode</span></div>
+        <div class="gen-panel-body">
+          <div class="form-group"><label class="form-label">Show Topic / Niche</label>
+            <input class="form-input" id="podcast-topic" placeholder="e.g. AI side hustles — weekly tips for online entrepreneurs"></div>
+          <button class="btn btn-primary btn-md" onclick="generate('podcast')" style="margin-top:.5rem">⚡ Generate Podcast Pack</button>
+          <div class="gen-progress-wrap" id="podcast-progress" style="display:none">
+            <div class="gen-step"><span id="podcast-step">Writing episodes...</span><span class="pct-label" id="podcast-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="podcast-fill" style="width:0%"></div></div>
+          </div>
+          <div class="output-box" id="podcast-output">
+            <div class="output-box-title"><span>✅</span> Podcast Pack Generated</div>
+            <div id="podcast-result"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI AGENT -->
+      <div class="gen-panel" id="panel-agent">
+        <div class="gen-panel-head"><div class="gen-panel-title">🤖 AI Agent / Persona Generator</div><span class="badge badge-purple">System Prompts</span></div>
+        <div class="gen-panel-body">
+          <div class="form-group"><label class="form-label">Agent Type / Persona</label>
+            <input class="form-input" id="agent-topic" placeholder="e.g. Fitness coach AI, Legal document assistant, Customer support bot"></div>
+          <button class="btn btn-primary btn-md" onclick="generate('agent')" style="margin-top:.5rem">⚡ Generate AI Agent</button>
+          <div class="gen-progress-wrap" id="agent-progress" style="display:none">
+            <div class="gen-step"><span id="agent-step">Building persona...</span><span class="pct-label" id="agent-pct">0%</span></div>
+            <div class="progress-track"><div class="progress-fill" id="agent-fill" style="width:0%"></div></div>
+          </div>
+          <div class="output-box" id="agent-output">
+            <div class="output-box-title"><span>✅</span> AI Agent Generated</div>
+            <div id="agent-result"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panels -->
+  </div><!-- /gen-layout -->
+</div>
+
+<footer>
+  <div class="footer-brand">ProductAI</div>
+  <div class="footer-sub">AI Digital Product Factory</div>
+</footer>
+
+<script src="js/app.js"></script>
+<script>
+// Show panel
+function showPanel(id, el) {
+  document.querySelectorAll('.gen-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// Select option button
+function selOpt(el, group) {
+  document.querySelectorAll(`.opt-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getOpt(group) {
+  const el = document.querySelector(`.opt-btn[data-group="${group}"].active .opt-label`);
+  return el ? el.textContent.toLowerCase() : '';
+}
+
+function val(id) { return document.getElementById(id)?.value?.trim() || ''; }
+
+// Show progress
+function showProgress(type, show) {
+  document.getElementById(`${type}-progress`).style.display = show ? 'block' : 'none';
+}
+function setProgress(type, pct, step) {
+  document.getElementById(`${type}-pct`).textContent = pct + '%';
+  document.getElementById(`${type}-step`).textContent = step;
+  document.getElementById(`${type}-fill`).style.width = pct + '%';
+}
+function showOutput(type) {
+  document.getElementById(`${type}-output`).style.display = 'block';
+}
+
+// Render result
+function renderResult(type, result) {
+  const el = document.getElementById(`${type}-result`);
+  const dl = document.getElementById(`${type}-downloads`);
+  if (!el) return;
+
+  if (result?.title) {
+    el.innerHTML = `<div style="font-family:var(--fd);font-weight:800;font-size:1rem;margin-bottom:.5rem">${result.title}</div>`;
+  }
+
+  // Download buttons
+  if (dl) {
+    dl.innerHTML = '';
+    if (result?.url) dl.innerHTML += `<a class="btn btn-success btn-sm" href="${result.url}" target="_blank" download>⬇ Download PDF</a>`;
+    if (result?.pdf_url) dl.innerHTML += `<a class="btn btn-success btn-sm" href="${result.pdf_url}" target="_blank" download>⬇ PDF</a>`;
+    if (result?.audio_url) dl.innerHTML += `<a class="btn btn-primary btn-sm" href="${result.audio_url}" target="_blank" download>🎧 Audio MP3</a>`;
+    if (result?.srt_url) dl.innerHTML += `<a class="btn btn-ghost btn-sm" href="${result.srt_url}" target="_blank" download>📝 Captions SRT</a>`;
+    if (result?.audio_urls?.length) result.audio_urls.forEach((u,i) => {
+      dl.innerHTML += `<a class="btn btn-primary btn-sm" href="${u}" target="_blank" download>🎧 Ch.${i+1}</a>`;
+    });
+  }
+
+  // Add list preview
+  const preview = buildPreview(type, result);
+  if (preview) el.innerHTML += preview;
+
+  // List to marketplace
+  if (dl && result?.product?.id) {
+    dl.innerHTML += `<button class="btn btn-outline btn-sm" onclick="listOnMarketplace('${result.product.id}')">🛒 List on Marketplace</button>`;
+  }
+}
+
+function buildPreview(type, result) {
+  const items = [];
+  if (result?.script) result.script.slice(0,3).forEach(s => items.push(`${s.timestamp} — ${s.text?.slice(0,80)}...`));
+  if (result?.data?.prompts) result.data.prompts.slice(0,4).forEach(p => items.push(`${p.id}. ${p.title}: ${p.prompt?.slice(0,60)}...`));
+  if (result?.data?.pieces) result.data.pieces.slice(0,4).forEach(p => items.push(`${p.type}: ${p.content?.slice(0,80)}...`));
+  if (result?.data?.chapters) result.data.chapters.slice(0,4).forEach(c => items.push(`Ch.${c.number}: ${c.title}`));
+  if (result?.data?.modules) result.data.modules.slice(0,3).forEach(m => items.push(`Module ${m.number}: ${m.title} (${m.lessons?.length||0} lessons)`));
+  if (result?.data?.pages) result.data.pages.slice(0,4).forEach(p => items.push(`Page ${p.page_number}: ${p.scene_title}`));
+  if (result?.images) result.images.slice(0,3).forEach(img => items.push(`🖼️ ${img.title}`));
+  if (!items.length) return '';
+  return `<div style="margin-top:.75rem">${items.map(i=>`<div class="output-item">${i}</div>`).join('')}</div>`;
+}
+
+async function listOnMarketplace(productId) {
+  Toast.info('Listing on marketplace...');
+  // TODO: call marketplace listing API
+  Toast.success('Listed! Check your dashboard.');
+}
+
+// ── MAIN GENERATE FUNCTION ──
+async function generate(type) {
+  if (!Auth.isLoggedIn()) {
+    Modal.open(`<div class="modal-title">Sign in to Generate</div>
+      <p style="color:var(--t2);margin-bottom:1.5rem;font-size:.9rem">Create a free account to start generating AI products.</p>
+      <a class="btn btn-primary btn-md" href="login.html" style="width:100%;justify-content:center">Sign In / Register →</a>`);
+    return;
+  }
+
+  let taskPromise, isAsync = true;
+
+  try {
+    showProgress(type, true); setProgress(type, 5, 'Starting...');
+
+    switch(type) {
+      case 'ebook': {
+        const topic = val('ebook-topic');
+        if (!topic) { Toast.error('Enter a topic'); return; }
+        taskPromise = API.genEbook({ topic, chapters: parseInt(val('ebook-chapters')), audience: val('ebook-audience') });
+        break;
+      }
+      case 'audiobook': {
+        const topic = val('audiobook-topic');
+        if (!topic) { Toast.error('Enter a topic'); return; }
+        const voiceMap = {'Female':'narrator_female','Male':'narrator_male','Child':'child_friendly','Calm':'calm','Energetic':'energetic','Professional':'professional'};
+        taskPromise = API.genAudiobook({ topic, chapters: parseInt(val('audiobook-chapters')), voice: voiceMap[getOpt('ab-voice')] || 'narrator_female' });
+        break;
+      }
+      case 'video': {
+        const topic = val('video-topic');
+        if (!topic) { Toast.error('Enter a topic'); return; }
+        taskPromise = API.genVideo({ topic, length: val('video-length'), platform: val('video-platform'), style: getOpt('vid-style') || 'educational', voice: 'narrator_female' });
+        break;
+      }
+      case 'images': {
+        const theme = val('images-theme');
+        if (!theme) { Toast.error('Enter a theme'); return; }
+        taskPromise = API.genImages({ theme, count: parseInt(val('images-count')), style: getOpt('img-style') || 'digital art' });
+        break;
+      }
+      case 'website': {
+        const name = val('website-name'), niche = val('website-niche');
+        if (!name || !niche) { Toast.error('Enter business name and niche'); return; }
+        taskPromise = API.genWebsite({ business_name: name, niche, style: getOpt('web-style') || 'modern' });
+        break;
+      }
+      case 'content': {
+        const topic = val('content-topic');
+        if (!topic) { Toast.error('Enter a topic'); return; }
+        taskPromise = API.genContent({ topic, pack_type: val('content-type') });
+        break;
+      }
+      case 'course': {
+        isAsync = false;
+        const topic = val('course-topic');
+        if (!topic) { Toast.error('Enter a topic'); return; }
+        setProgress(type, 30, 'Building curriculum...');
+        const r = await API.genCourse({ topic, level: val('course-level') });
+        setProgress(type, 100, 'Done!');
+        showOutput(type); renderResult(type, r);
+        showProgress(type, false);
+        Toast.success('Course generated!');
+        return;
+      }
+      case 'prompts': {
+        const cat = val('prompts-category');
+        if (!cat) { Toast.error('Enter a category'); return; }
+        taskPromise = API.genPrompts({ category: cat, count: parseInt(val('prompts-count')) });
+        break;
+      }
+      case 'coloring': {
+        isAsync = false;
+        const theme = val('coloring-theme');
+        if (!theme) { Toast.error('Enter a theme'); return; }
+        setProgress(type, 30, 'Designing pages...');
+        const r = await API.genColoring({ theme, pages: parseInt(val('coloring-pages')), age_group: val('coloring-age') });
+        setProgress(type, 100, 'Done!'); showOutput(type); renderResult(type, r); showProgress(type, false);
+        Toast.success('Coloring book designed!');
+        return;
+      }
+      case 'template': case 'podcast': case 'agent': {
+        isAsync = false;
+        const topic = val(`${type}-topic`);
+        if (!topic) { Toast.error('Enter a topic'); return; }
+        setProgress(type, 30, 'Generating...');
+        const r = await API.genContent({ topic, pack_type: type === 'podcast' ? 'podcast' : 'social' });
+        setProgress(type, 100, 'Done!'); showOutput(type); renderResult(type, r); showProgress(type, false);
+        Toast.success('Generated!');
+        return;
+      }
+    }
+
+    if (!taskPromise) return;
+
+    const taskResult = await taskPromise;
+    const taskId = taskResult.task_id;
+    setProgress(type, 10, 'Queued...');
+
+    pollTask(taskId,
+      (pct, step) => setProgress(type, pct, step),
+      (result) => {
+        setProgress(type, 100, 'Done!');
+        showOutput(type); renderResult(type, result);
+        showProgress(type, false);
+        Toast.success('Product generated successfully!');
+      },
+      (err) => { showProgress(type, false); Toast.error(err); }
+    );
+
+  } catch(e) {
+    showProgress(type, false);
+    Toast.error(e.message || 'Generation failed');
+  }
+}
+
+// Load credits
+(async () => {
+  if (Auth.isLoggedIn()) {
+    try {
+      const u = Auth.user();
+      const badge = document.getElementById('creditsBadge');
+      if (badge && u) badge.textContent = u.plan === 'agency' ? '∞ credits' : `${u.credits||0} credits`;
+    } catch{}
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProductAI — AI Digital Product Factory</title>
+<meta name="description" content="Generate videos, PDFs, audiobooks, images, websites, courses, prompt packs and more with AI. Sell on our marketplace. Host free on GitHub.">
+<link rel="stylesheet" href="css/app.css">
+<style>
+/* ── HERO ── */
+.hero-wrap { position: relative; overflow: hidden; }
+.hero-glow {
+  position: absolute; width: 800px; height: 800px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,255,.18) 0%, transparent 70%);
+  top: -200px; left: -200px; pointer-events: none;
+}
+.hero-glow2 {
+  position: absolute; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,.12) 0%, transparent 70%);
+  bottom: -100px; right: -100px; pointer-events: none;
+}
+.hero { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 6rem 2rem 4rem; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--fm); font-size: .72rem; color: var(--g2); border: 1px solid rgba(52,211,153,.25); padding: .32rem .8rem; border-radius: 100px; margin-bottom: 1.75rem; text-transform: uppercase; letter-spacing: .1em; }
+.hero-eyebrow::before { content:''; width:6px;height:6px;background:var(--g2);border-radius:50%;animation:blink 1.5s infinite; }
+h1.headline { font-family: var(--fd); font-weight: 900; font-size: clamp(3rem,6vw,5.5rem); line-height: 1; letter-spacing: -.04em; max-width: 820px; margin-bottom: 1.5rem; }
+h1.headline .hi { background: linear-gradient(135deg,var(--v) 0%,var(--g) 100%); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+.hero-sub { font-size: 1.1rem; color: var(--t2); max-width: 560px; line-height: 1.75; margin-bottom: 2.5rem; }
+.hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+.hero-social { display: flex; gap: 2rem; }
+.hero-social-item { display: flex; flex-direction: column; }
+.hs-num { font-family: var(--fd); font-weight: 900; font-size: 1.4rem; letter-spacing: -.03em; color: var(--text); }
+.hs-lbl { font-size: .75rem; color: var(--t3); }
+
+/* ── PRODUCT TYPES ── */
+.product-types-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 1rem; }
+.pt-card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--rad); padding: 1.5rem; transition: all var(--tr); cursor: default; }
+.pt-card:hover { border-color: rgba(124,58,255,.4); background: var(--s2); transform: translateY(-3px); }
+.pt-icon { font-size: 2rem; margin-bottom: .75rem; display: block; }
+.pt-name { font-family: var(--fd); font-weight: 800; font-size: .95rem; margin-bottom: .3rem; }
+.pt-desc { font-size: .8rem; color: var(--t2); line-height: 1.5; }
+.pt-price { font-family: var(--fm); font-size: .72rem; color: var(--g); margin-top: .6rem; }
+
+/* ── TERMINAL ── */
+.term { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; font-family: var(--fm); font-size: .78rem; }
+.term-bar { background: var(--s2); padding: .65rem 1rem; display: flex; align-items: center; gap: .45rem; border-bottom: 1px solid var(--border); }
+.td { width:10px;height:10px;border-radius:50%; }
+.td1{background:#ff5f57} .td2{background:#febc2e} .td3{background:#28c840}
+.term-body { padding: 1.4rem; line-height: 2.1; }
+.tm{color:var(--t2)} .tv{color:var(--v2)} .tg{color:var(--g2)} .to{color:var(--o)} .ty{color:var(--y)}
+.cursor { display:inline-block;width:7px;height:14px;background:var(--g2);animation:blink 1s infinite;vertical-align:middle; }
+
+/* ── PRICING ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1.25rem; }
+.price-card { background: var(--s1); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; position: relative; transition: all var(--tr); }
+.price-card.featured { border-color: var(--v); background: linear-gradient(145deg, rgba(124,58,255,.08), var(--s1)); }
+.price-card.featured::before { content:'Most Popular'; position:absolute;top:-1px;left:50%;transform:translateX(-50%); background:var(--v); color:#fff; font-family:var(--fd); font-weight:800; font-size:.7rem; padding:.3rem .9rem; border-radius:0 0 8px 8px; letter-spacing:.05em; }
+.price-name { font-family:var(--fd); font-weight:800; font-size:1rem; margin-bottom:.5rem; }
+.price-amount { font-family:var(--fd); font-weight:900; font-size:2.5rem; letter-spacing:-.04em; margin-bottom:.25rem; }
+.price-amount span { font-size:1rem; font-weight:500; color:var(--t2); }
+.price-desc { font-size:.8rem; color:var(--t2); margin-bottom:1.5rem; }
+.price-features { list-style:none; margin-bottom:1.5rem; }
+.price-features li { font-size:.83rem; padding:.35rem 0; color:var(--t2); display:flex; align-items:center; gap:.5rem; border-bottom:1px solid var(--border); }
+.price-features li:last-child{border:none}
+.price-features li::before { content:'✓'; color:var(--g); font-weight:700; flex-shrink:0; }
+
+/* ── HOW IT WORKS ── */
+.steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.5rem; }
+.step { text-align:center; padding:1.5rem 1rem; }
+.step-num { width:44px;height:44px;background:linear-gradient(135deg,var(--v),var(--g));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-weight:900;font-size:1.1rem;color:#fff;margin:0 auto .9rem; }
+.step-title { font-family:var(--fd); font-weight:800; font-size:.95rem; margin-bottom:.35rem; }
+.step-desc { font-size:.82rem; color:var(--t2); line-height:1.6; }
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .6s ease forwards;opacity:0}
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}.d5{animation-delay:.5s}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="index.html"><div class="nav-logo-icon">🏭</div> ProductAI</a>
+  <ul class="nav-links">
+    <li><a href="generate.html">Generate</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="index.html#pricing">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+    <a id="nav-login" class="btn btn-ghost btn-sm" href="login.html">Sign In</a>
+    <a class="btn btn-primary btn-sm" href="generate.html">Start Free →</a>
+    <a id="nav-logout" class="btn btn-ghost btn-sm" href="#" onclick="Auth.logout()" style="display:none">Logout</a>
+    <a id="nav-dashboard" class="btn btn-success btn-sm" href="dashboard.html" style="display:none">Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero">
+    <div class="hero-eyebrow fade-up">AI Product Factory · 12 Product Types</div>
+    <h1 class="headline fade-up d1">Turn any idea into<br><em class="hi">digital products</em><br>that sell.</h1>
+    <p class="hero-sub fade-up d2">Generate ebooks, audiobooks, videos, AI images, full websites, courses, prompt packs, coloring books, and more — in seconds. Sell on our marketplace or keep everything.</p>
+    <div class="hero-btns fade-up d3">
+      <a class="btn btn-primary btn-lg" href="generate.html">⚡ Start Generating Free</a>
+      <a class="btn btn-ghost btn-lg" href="marketplace.html">🛒 Browse Marketplace</a>
+    </div>
+    <div class="hero-social fade-up d4">
+      <div class="hero-social-item"><span class="hs-num">12</span><span class="hs-lbl">Product Types</span></div>
+      <div class="hero-social-item"><span class="hs-num">$0</span><span class="hs-lbl">to Host</span></div>
+      <div class="hero-social-item"><span class="hs-num">60s</span><span class="hs-lbl">Avg Gen Time</span></div>
+      <div class="hero-social-item"><span class="hs-num">4×</span><span class="hs-lbl">Revenue Streams</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT TYPES -->
+<div style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section">
+    <div class="section-label">// What You Can Generate</div>
+    <h2 class="section-title">12 Digital Product Types</h2>
+    <p class="section-sub">Every product is AI-generated end-to-end. Input a topic, get a ready-to-sell digital product.</p>
+    <div class="product-types-grid">
+      <div class="pt-card"><span class="pt-icon">📘</span><div class="pt-name">Ebooks & PDFs</div><div class="pt-desc">Full chapters, TOC, cover, affiliate links. Professional layout.</div><div class="pt-price">Avg sell: $9–$49</div></div>
+      <div class="pt-card"><span class="pt-icon">🎧</span><div class="pt-name">Audiobooks</div><div class="pt-desc">Written + ElevenLabs narration. MP3 + PDF companion. Chapter markers.</div><div class="pt-price">Avg sell: $19–$97</div></div>
+      <div class="pt-card"><span class="pt-icon">🎬</span><div class="pt-name">Video Scripts</div><div class="pt-desc">Script + voiceover + captions SRT + thumbnail prompt. TikTok/YouTube ready.</div><div class="pt-price">Avg sell: $29–$149/course</div></div>
+      <div class="pt-card"><span class="pt-icon">🖼️</span><div class="pt-name">Image Packs</div><div class="pt-desc">10–50 DALL-E 3 generated images. Themed collections, stock-style art.</div><div class="pt-price">Avg sell: $7–$39</div></div>
+      <div class="pt-card"><span class="pt-icon">🌐</span><div class="pt-name">Websites</div><div class="pt-desc">Complete single-page sites. HTML/CSS/JS. Ready to deploy in minutes.</div><div class="pt-price">Avg sell: $49–$299</div></div>
+      <div class="pt-card"><span class="pt-icon">✍️</span><div class="pt-name">Content Packs</div><div class="pt-desc">30 social posts, 7-part email sequences, 5 blog posts, 20 ad copies.</div><div class="pt-price">Avg sell: $19–$79</div></div>
+      <div class="pt-card"><span class="pt-icon">🎓</span><div class="pt-name">Online Courses</div><div class="pt-desc">Full curriculum, lessons, quizzes, resources. LMS-ready JSON export.</div><div class="pt-price">Avg sell: $97–$497</div></div>
+      <div class="pt-card"><span class="pt-icon">✨</span><div class="pt-name">Prompt Packs</div><div class="pt-desc">50–200 engineered AI prompts. ChatGPT, Claude, Midjourney, DALL-E.</div><div class="pt-price">Avg sell: $7–$29</div></div>
+      <div class="pt-card"><span class="pt-icon">🖍️</span><div class="pt-name">Coloring Books</div><div class="pt-desc">AI-generated line art pages. Kids & adult themes. Print-on-demand ready.</div><div class="pt-price">Avg sell: $3–$19</div></div>
+      <div class="pt-card"><span class="pt-icon">📊</span><div class="pt-name">Templates</div><div class="pt-desc">Planners, trackers, journals, business docs. Fillable PDF format.</div><div class="pt-price">Avg sell: $5–$29</div></div>
+      <div class="pt-card"><span class="pt-icon">🎵</span><div class="pt-name">Podcast Scripts</div><div class="pt-desc">Full episode scripts, show notes, intros/outros, guest question banks.</div><div class="pt-price">Avg sell: $19–$49/pack</div></div>
+      <div class="pt-card"><span class="pt-icon">🤖</span><div class="pt-name">AI Agents</div><div class="pt-desc">Custom GPT system prompts, Claude personas, chatbot configurations.</div><div class="pt-price">Avg sell: $29–$199</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TERMINAL DEMO -->
+<div class="section" style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center">
+  <div>
+    <div class="section-label">// How It Works</div>
+    <h2 class="section-title">Type a topic.<br>Get a product.</h2>
+    <p class="section-sub">Our AI chain handles everything: research, writing, formatting, voiceover, and file packaging. You just download and sell.</p>
+    <div class="steps" style="grid-template-columns:1fr;gap:1rem;margin-top:0">
+      <div class="step" style="text-align:left;padding:.75rem 0;display:flex;gap:1rem;align-items:flex-start">
+        <div class="step-num">1</div>
+        <div><div class="step-title">Enter your topic</div><div class="step-desc">Any niche. Kids learning, Bitcoin, fitness, coding, spirituality — anything.</div></div>
+      </div>
+      <div class="step" style="text-align:left;padding:.75rem 0;display:flex;gap:1rem;align-items:flex-start">
+        <div class="step-num">2</div>
+        <div><div class="step-title">Choose product type</div><div class="step-desc">Ebook, audiobook, video, images, website, course, prompts, or more.</div></div>
+      </div>
+      <div class="step" style="text-align:left;padding:.75rem 0;display:flex;gap:1rem;align-items:flex-start">
+        <div class="step-num">3</div>
+        <div><div class="step-title">AI generates everything</div><div class="step-desc">Claude writes it, DALL-E illustrates it, ElevenLabs narrates it.</div></div>
+      </div>
+      <div class="step" style="text-align:left;padding:.75rem 0;display:flex;gap:1rem;align-items:flex-start">
+        <div class="step-num">4</div>
+        <div><div class="step-title">Download & sell</div><div class="step-desc">List on our marketplace or sell anywhere — Gumroad, Etsy, your own site.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="term">
+    <div class="term-bar"><div class="td td1"></div><div class="td td2"></div><div class="td td3"></div><span style="font-size:.72rem;color:var(--t2);margin-left:.5rem">productai — generate</span></div>
+    <div class="term-body">
+      <div><span class="tm">$</span> productai generate <span class="tv">--type audiobook</span></div>
+      <div><span class="tm">  topic:</span> <span class="ty">"Bitcoin for Beginners"</span></div>
+      <div><span class="tm">  chapters:</span> 8 · voice: professional_male</div>
+      <div>&nbsp;</div>
+      <div><span class="tg">▸</span> <span class="tm">Calling Claude claude-sonnet-4-20250514...</span></div>
+      <div><span class="tg">✓</span> Outline generated (8 chapters)</div>
+      <div><span class="tg">✓</span> Chapter 1–8 written (62,400 words)</div>
+      <div><span class="tg">▸</span> <span class="tm">ElevenLabs voiceover synthesis...</span></div>
+      <div><span class="tg">✓</span> Audio: 4h 32min · 312MB MP3</div>
+      <div><span class="tg">▸</span> <span class="tm">Building PDF with publisher template...</span></div>
+      <div><span class="tg">✓</span> PDF: 247 pages · TOC · tables · refs</div>
+      <div><span class="tg">▸</span> <span class="tm">Uploading to Supabase storage...</span></div>
+      <div>&nbsp;</div>
+      <div><span class="tg">✔ DONE</span> <span class="tm">— 2 files ready to download</span></div>
+      <div><span class="tm">  Est. market value: </span><span class="to">$27–$47</span> <span class="cursor"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div id="pricing" style="background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section">
+    <div class="section-label">// Pricing</div>
+    <h2 class="section-title">Start free. Scale when ready.</h2>
+    <p class="section-sub">Every plan includes all 12 product types. No feature gating — only generation volume.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amount">$0<span>/mo</span></div>
+        <div class="price-desc">Perfect for testing the platform</div>
+        <ul class="price-features">
+          <li>3 products/month</li>
+          <li>All 12 product types</li>
+          <li>ProductAI watermark</li>
+          <li>Marketplace listing</li>
+          <li>Community support</li>
+        </ul>
+        <a class="btn btn-ghost btn-md" href="login.html" style="width:100%;justify-content:center">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Starter</div>
+        <div class="price-amount">$19<span>/mo</span></div>
+        <div class="price-desc">For solo creators building income</div>
+        <ul class="price-features">
+          <li>50 products/month</li>
+          <li>No watermarks</li>
+          <li>Download + resell rights</li>
+          <li>Priority generation queue</li>
+          <li>Affiliate auto-insert</li>
+          <li>Email support</li>
+        </ul>
+        <button class="btn btn-primary btn-md" onclick="startCheckout('starter')" style="width:100%;justify-content:center">Start Starter →</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Pro</div>
+        <div class="price-amount">$49<span>/mo</span></div>
+        <div class="price-desc">For serious digital product businesses</div>
+        <ul class="price-features">
+          <li>500 products/month</li>
+          <li>Bulk generation</li>
+          <li>API access</li>
+          <li>White-label PDFs</li>
+          <li>Marketplace storefront</li>
+          <li>Analytics dashboard</li>
+        </ul>
+        <button class="btn btn-outline btn-md" onclick="startCheckout('pro')" style="width:100%;justify-content:center">Start Pro →</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Agency</div>
+        <div class="price-amount">$149<span>/mo</span></div>
+        <div class="price-desc">Unlimited for teams & agencies</div>
+        <ul class="price-features">
+          <li>Unlimited products</li>
+          <li>Full white-label</li>
+          <li>Team seats (5)</li>
+          <li>Custom AI personas</li>
+          <li>Zapier integration</li>
+          <li>Dedicated support</li>
+        </ul>
+        <button class="btn btn-success btn-md" onclick="startCheckout('agency')" style="width:100%;justify-content:center">Start Agency →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">ProductAI</div>
+  <div class="footer-sub">AI Digital Product Factory · Free to host on GitHub Pages · Built with Claude & ❤️</div>
+  <div style="display:flex;gap:1.5rem;justify-content:center;margin-top:1rem">
+    <a href="generate.html" style="color:var(--t3);text-decoration:none;font-size:.8rem">Generate</a>
+    <a href="marketplace.html" style="color:var(--t3);text-decoration:none;font-size:.8rem">Marketplace</a>
+    <a href="dashboard.html" style="color:var(--t3);text-decoration:none;font-size:.8rem">Dashboard</a>
+    <a href="deploy.html" style="color:var(--t3);text-decoration:none;font-size:.8rem">Deploy Guide</a>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script>
+async function startCheckout(plan) {
+  if (!Auth.isLoggedIn()) { window.location = 'login.html?next=pricing'; return; }
+  try {
+    Toast.info('Opening checkout...');
+    const r = await API.checkout(plan);
+    window.location = r.checkout_url;
+  } catch(e) { Toast.error(e.message); }
+}
+</script>
+</body>
+</html>
